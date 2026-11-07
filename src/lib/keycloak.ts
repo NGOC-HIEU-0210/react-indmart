@@ -1,0 +1,12 @@
+import Keycloak from 'keycloak-js';
+
+const keycloakConfig = {
+  url: import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8080',
+  realm: import.meta.env.VITE_KEYCLOAK_REALM || 'indmart',
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'indmart-web',
+};
+
+const keycloak = new Keycloak(keycloakConfig);
+
+export default keycloak;
+

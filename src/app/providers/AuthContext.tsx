@@ -24,6 +24,21 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// keycloak.init() chỉ được gọi MỘT lần cho mỗi instance. React.StrictMode (chế độ dev)
+// chạy useEffect hai lần nên phải dùng chung một promise, nếu không lần gọi thứ hai bị lỗi
+// và web hiểu nhầm là chưa đăng nhập dù Keycloak đã đăng nhập xong.
+let keycloakInitPromise: Promise<boolean> | null = null;
+const initKeycloak = (): Promise<boolean> => {
+  if (!keycloakInitPromise) {
+    keycloakInitPromise = keycloak.init({
+      onLoad: 'check-sso',
+      pkceMethod: 'S256',
+      checkLoginIframe: false,
+    });
+  }
+  return keycloakInitPromise;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,12 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let isMounted = true;
 
-    keycloak
-      .init({
-        onLoad: 'check-sso',
-        pkceMethod: 'S256',
-        checkLoginIframe: false,
-      })
+    initKeycloak()
       .then((authenticated) => {
         if (!isMounted) return;
         setIsAuthenticated(authenticated);
@@ -121,4 +131,3 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
-

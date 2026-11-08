@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { productsApi, ProductPayload } from '../api/productsApi';
 
@@ -18,6 +18,7 @@ export function useLatestProducts(page = 0, size = 8) {
   return useQuery({
     queryKey: PRODUCTS_QUERY_KEYS.latest(page, size),
     queryFn: () => productsApi.getLatest(page, size),
+    placeholderData: keepPreviousData, // giữ lưới cũ khi đang tải trang mới, tránh nháy skeleton
   });
 }
 
